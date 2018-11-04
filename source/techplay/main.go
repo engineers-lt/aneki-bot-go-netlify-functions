@@ -44,15 +44,21 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	//  root: <div class="title-heading">
 	techplayEvent.Title = doc.Find("div.title-heading > h1").Text()
 
+	// 日付部分抜き出し
+	//  root: <div class="event-day">
+	techplayEvent.Day = doc.Find("div.event-day").Text()
+
+	// 時間部分抜き出し
+	//  root: <div class="event-time">
+	techplayEvent.Time = doc.Find("div.event-time").Text()
+
 	// 参加枠、定員抜き出し
 	//  root: <div id="participationTable">
 	tableSelection := doc.Find("div#participationTable > table > tbody > tr")
-	reSpan := regexp.MustCompile(`(?m)<.span.>`)
-	//reNewLine := regexp.MustCompile(`(?m)\n`)
+	reSpan := regexp.MustCompile(`<.span.>`)
 	tableSelection.Each(func(_ int, s *goquery.Selection) {
 		d := Detail{Category: s.Find("td.category > div.category-inner > div").Text()}
-		c := reSpan.ReplaceAllString(strings.Replace(s.Find("td.capacity").Text(), "\n", "", -1), "")
-		d.Capacity = strings.Replace(strings.Replace(c, " ", "", -1), "定員", "", -1)
+		d.Capacity = getCapacity(reSpan, s.Find("td.capacity").Text())
 		techplayEvent.DetailList = append(techplayEvent.DetailList, &d)
 	})
 
@@ -67,4 +73,13 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 func main() {
 	lambda.Start(handler)
+}
+
+// データクレンジングをしながら定員のみの文字列を取得する
+func getCapacity(r *regexp.Regexp, target string) string {
+	result := strings.Replace(target, "\n", "", -1)
+	result = strings.Replace(result, " ", "", -1)
+	result = strings.Replace(result, "定員", "", -1)
+	result = r.ReplaceAllString(result, "")
+	return strings.Replace(result, "／", "/", -1)
 }
