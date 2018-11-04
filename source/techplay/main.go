@@ -12,15 +12,16 @@ import (
 )
 
 type Detail struct {
-	Category string `json:category`
-	Capacity string `json:capacity`
+	Category string `json:"category"`
+	Capacity string `json:"capacity"`
 }
 type Details []*Detail
 type TechplayEvent struct {
-	Title      string  `json:title`
-	Day        string  `json:day`
-	Time       string  `json:time`
-	DetailList Details `json:detail_list`
+	EventUrl   string  `json:"event_url"`
+	Title      string  `json:"title"`
+	Day        string  `json:"day"`
+	Time       string  `json:"time"`
+	DetailList Details `json:"detail_list"`
 }
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -38,7 +39,10 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	// TechplayEvent生成
-	techplayEvent := TechplayEvent{DetailList: Details{}}
+	techplayEvent := TechplayEvent{
+		EventUrl:   fmt.Sprintf(eventUrl, eventId),
+		DetailList: Details{},
+	}
 
 	// タイトル部分抜き出し
 	//  root: <div class="title-heading">
