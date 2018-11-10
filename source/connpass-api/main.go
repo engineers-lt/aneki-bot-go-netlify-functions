@@ -78,7 +78,9 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	// TODO: タイトル部分抜き出し
-	//  現状はGAS側で補完してあげる
+	// どうにかせねば(´・ω・｀)
+	connpassEvent.Title = "秋の夜長の自由研究LT大会"
+	connpassEvent.EventUrl = eventUrl
 
 	// 日付部分抜き出し
 	//  root: <div class="event-day">
