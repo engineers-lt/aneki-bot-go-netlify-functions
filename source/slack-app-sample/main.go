@@ -1,20 +1,41 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
+type SlackRequest struct {
+	Token     string `json:token`
+	Challenge string `json:challenge`
+	Type      string `json:type`
+}
+
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	log.Printf(request.Body)
+	// リクエスト情報をログ出力
+	log.Print(request.Body)
 
-	return events.APIGatewayProxyResponse{
-		StatusCode: 200,
-		Body:       "slack-app-sample",
-	}, nil
+	// jsonデコード
+	slackRequest := new(SlackRequest)
+	jsonBytes := ([]byte)(request.Body)
+	err := json.Unmarshal(jsonBytes, slackRequest)
+	if err != nil {
+		log.Fatal("Json Unmarshal error: ", err)
+
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Body:       err.Error(),
+		}, nil
+	} else {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Body:       slackRequest.Challenge,
+		}, nil
+	}
 }
 
 func main() {
