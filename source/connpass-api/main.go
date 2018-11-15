@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -60,6 +61,8 @@ type ConnpassEvent struct {
 }
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	log.Printf(request.Body)
 
 	// イベントURL
 	eventUrl := "https://engineers.connpass.com/event/104940/"

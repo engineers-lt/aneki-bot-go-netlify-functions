@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 
@@ -25,6 +26,8 @@ type TechplayEvent struct {
 }
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	log.Printf(request.Body)
 
 	// イベントURL
 	eventUrl := "https://techplay.jp/event/%d"
