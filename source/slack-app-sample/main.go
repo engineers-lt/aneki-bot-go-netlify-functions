@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type SlackRequest struct {
+type SlackRequestFirst struct {
 	Token     string `json:token`
 	Challenge string `json:challenge`
 	Type      string `json:type`
@@ -20,7 +20,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	log.Print(request.Body)
 
 	// jsonデコード
-	slackRequest := new(SlackRequest)
+	slackRequest := new(SlackRequestFirst)
 	jsonBytes := ([]byte)(request.Body)
 	err := json.Unmarshal(jsonBytes, slackRequest)
 	if err != nil {

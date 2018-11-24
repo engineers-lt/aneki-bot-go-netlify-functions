@@ -12,6 +12,11 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
+// Request用オブジェクト
+type TechplayParam struct {
+	EventId int `json:"event_id"`
+}
+
 type Detail struct {
 	Category string `json:"category"`
 	Capacity string `json:"capacity"`
@@ -32,18 +37,21 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// イベントURL
 	eventUrl := "https://techplay.jp/event/%d"
 
-	// とりあえず固定
-	eventId := 705867
+	// リクエスト情報をパース
+	requestParam := new(TechplayParam)
+	if err := json.Unmarshal(([]byte)(request.Body), requestParam); err != nil {
+		return events.APIGatewayProxyResponse{}, err
+	}
 
 	// イベントページ取得
-	doc, err := goquery.NewDocument(fmt.Sprintf(eventUrl, eventId))
+	doc, err := goquery.NewDocument(fmt.Sprintf(eventUrl, requestParam.EventId))
 	if err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}
 
 	// TechplayEvent生成
 	techplayEvent := TechplayEvent{
-		EventUrl:   fmt.Sprintf(eventUrl, eventId),
+		EventUrl:   fmt.Sprintf(eventUrl, requestParam.EventId),
 		DetailList: Details{},
 	}
 
