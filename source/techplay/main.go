@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -27,6 +28,7 @@ type TechplayEvent struct {
 	Title      string  `json:"title"`
 	Day        string  `json:"day"`
 	Time       string  `json:"time"`
+	Total      string  `json:"total"`
 	DetailList Details `json:"detail_list"`
 }
 
@@ -77,6 +79,9 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		techplayEvent.DetailList = append(techplayEvent.DetailList, &d)
 	})
 
+	// 合計人数取得
+	techplayEvent.Total = getTotal(techplayEvent.DetailList)
+
 	// jsonエンコード
 	result, _ := json.Marshal(techplayEvent)
 
@@ -96,5 +101,45 @@ func getCapacity(r *regexp.Regexp, target string) string {
 	result = strings.Replace(result, " ", "", -1)
 	result = strings.Replace(result, "定員", "", -1)
 	result = r.ReplaceAllString(result, "")
-	return strings.Replace(result, "／", "/", -1)
+	result = strings.Replace(result, "／", "/", -1)
+
+	// connpass-apiと同じ表記にするために最初の"人"を除外
+	if idx := strings.Index(result, "/"); 0 < idx {
+		result = strings.Replace(result[:idx], "人", "", 1) + result[idx:]
+	}
+
+	return result
+}
+
+// 合計人数を取得する
+func getTotal(dArr Details) string {
+	total := 0
+	for _, d := range dArr {
+		if num, result := capacity2JoinNum(d.Capacity); result {
+			log.Printf("%s, %d¥n", d.Capacity, num)
+			total += num
+		}
+	}
+	return fmt.Sprintf("%d人", total)
+}
+
+// Detail.Capacityから参加人数のみ取得
+func capacity2JoinNum(target string) (int, bool) {
+	if idx := strings.Index(target, "/"); 0 < idx {
+		mol := 0
+		if num, err := strconv.Atoi(target[0:idx]); err == nil {
+			mol = num
+		}
+		if idxDen := strings.Index(target, "人"); 0 < idxDen {
+			if num, err := strconv.Atoi(target[idx+1 : idxDen]); err == nil && num < mol {
+				mol = num
+			}
+		}
+		return mol, true
+	} else if idx := strings.Index(target, "人"); 0 < idx {
+		if num, err := strconv.Atoi(target[0:idx]); err == nil {
+			return num, true
+		}
+	}
+	return -1, false
 }
