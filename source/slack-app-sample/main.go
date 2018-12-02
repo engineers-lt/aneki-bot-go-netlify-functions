@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -51,7 +52,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		slackRequest := new(SlackRequest)
 		if err := json.Unmarshal(([]byte)(request.Body), slackRequest); err == nil && 0 < len(slackRequest.Token) {
 			// トークンが取得できたらオウム返しを行う
-			api := slack.New(slackRequest.Token)
+			token := os.Getenv("BOT_TOKEN")
+			api := slack.New(token)
 			_, _, err = api.PostMessage(
 				slackRequest.Event.Channel,
 				slack.MsgOptionText(
