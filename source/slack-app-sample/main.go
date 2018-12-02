@@ -52,7 +52,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		if err := json.Unmarshal(([]byte)(request.Body), slackRequest); err == nil && 0 < len(slackRequest.Token) {
 			// トークンが取得できたらオウム返しを行う
 			api := slack.New(slackRequest.Token)
-			_, _, _ = api.PostMessage(
+			_, _, err = api.PostMessage(
 				slackRequest.Event.Channel,
 				slack.MsgOptionText(
 					slackRequest.Event.Text,
@@ -61,7 +61,11 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			)
 
 			// 返す先はないが200OKとする
-			log.Print("ok")
+			if err != nil {
+				log.Print("err: ", err)
+			} else {
+				log.Print("ok")
+			}
 			return events.APIGatewayProxyResponse{
 				StatusCode: 200,
 				Body:       "",
