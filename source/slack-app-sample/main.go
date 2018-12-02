@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/nlopes/slack"
 )
 
 type SlackRequestFirst struct {
@@ -33,12 +34,6 @@ type SlackRequest struct {
 	AuthedUsers []string `json:"authed_users"`
 }
 
-type SlackResponse struct {
-	Token   string `json:"text"`
-	Channel string `json:"text"`
-	Text    string `json:"text"`
-}
-
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	// リクエスト情報をログ出力
@@ -54,15 +49,20 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	} else {
 		slackRequest := new(SlackRequest)
 		if err := json.Unmarshal(([]byte)(request.Body), slackRequest); err == nil && 0 < len(slackRequest.Token) {
-			slackResponse := SlackResponse{
-				slackRequest.Token,
+			// トークンが取得できたらオウム返しを行う
+			api := slack.New(slackRequest.Token)
+			_, _, _ = api.PostMessage(
 				slackRequest.Event.Channel,
-				"受信した。",
-			}
-			result, _ := json.Marshal(slackResponse)
+				slack.MsgOptionText(
+					slackRequest.Event.Text,
+					false,
+				),
+			)
+
+			// 返す先はないが200OKとする
 			return events.APIGatewayProxyResponse{
 				StatusCode: 200,
-				Body:       string(result),
+				Body:       "",
 			}, nil
 		} else {
 			return events.APIGatewayProxyResponse{}, nil
