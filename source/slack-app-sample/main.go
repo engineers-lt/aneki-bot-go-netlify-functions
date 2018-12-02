@@ -42,6 +42,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// 疎通確認用のリクエストか確認
 	slackRequestFirst := new(SlackRequestFirst)
 	if err := json.Unmarshal(([]byte)(request.Body), slackRequestFirst); err == nil && 0 < len(slackRequestFirst.Challenge) {
+		log.Print("first")
 		return events.APIGatewayProxyResponse{
 			StatusCode: 200,
 			Body:       slackRequestFirst.Challenge,
@@ -60,11 +61,13 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			)
 
 			// 返す先はないが200OKとする
+			log.Print("ok")
 			return events.APIGatewayProxyResponse{
 				StatusCode: 200,
 				Body:       "",
 			}, nil
 		} else {
+			log.Print("err")
 			return events.APIGatewayProxyResponse{}, nil
 		}
 	}
