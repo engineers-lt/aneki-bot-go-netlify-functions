@@ -53,7 +53,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		if err := json.Unmarshal(([]byte)(request.Body), slackRequest); err == nil && 0 < len(slackRequest.Token) {
 			// トークンが取得できたら返事する
 			token := os.Getenv("BOT_TOKEN")
-			log.Print(token)
+			//log.Print(token)
 			api := slack.New(token)
 			_, _, err = api.PostMessage(
 				slackRequest.Event.Channel,
