@@ -58,7 +58,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			_, _, err = api.PostMessage(
 				slackRequest.Event.Channel,
 				slack.MsgOptionText(
-					"ありがとよ",
+					"<@"+slackRequest.Event.User+"> ありがとよ",
 					false,
 				),
 			)
