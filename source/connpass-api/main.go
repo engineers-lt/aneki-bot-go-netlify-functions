@@ -16,7 +16,6 @@ import (
 // Request用オブジェクト
 type ConnpassParam struct {
 	EventUrl string `json:"event_url"`
-	Title    string `json:"title"`
 }
 
 // 返却するJSONオブジェクト
@@ -54,9 +53,13 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// TODO: タイトルもスクレイピングで取得できるようにしたい
 	connpassEvent := ConnpassEvent{
 		EventUrl:   requestParam.EventUrl,
-		Title:      requestParam.Title,
 		DetailList: Details{},
 	}
+
+	// タイトル抜き出し
+	//  <head> => <title>
+	r := regexp.MustCompile(` - connpass$`)
+	connpassEvent.Title = r.ReplaceAllString(doc.Find("head > title").Text(), "")
 
 	// 日付部分抜き出し
 	//  root: <div class="event-day">
